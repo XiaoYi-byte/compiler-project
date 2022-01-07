@@ -1,0 +1,5 @@
+﻿  lexical.cpp
+C:\Users\xltx-\Desktop\project\part1\p1\lexical.cpp(43,23): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\xltx-\Desktop\project\part1\p1\lexical.cpp(54,23): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\xltx-\Desktop\project\part1\p1\lexical.cpp(83,30): warning C4018: “<”: 有符号/无符号不匹配
+  p1.vcxproj -> C:\Users\xltx-\Desktop\project\part1\Debug\p1.exe
