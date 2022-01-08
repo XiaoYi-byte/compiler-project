@@ -1,15 +1,5 @@
-DFA最小化划分的子集如下：
-DEFG
-B
-C
-A
-用状态P,Q···等代替子集：
-{DEFG},{B},{C},{A}则DFA最小化后的各边信息如下：
-P  a  P
-P  b  P
-Q  a  P
-Q  b  R
-R  a  Q
-R  b  P
-S  a  Q
-S  b  R
+l d
+P Q #
+Q Q Q
+#
+Q

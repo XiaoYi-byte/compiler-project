@@ -1,9 +1,10 @@
-state  a  b  
+a  b  
 A  B  C  
 B  D  C  
 C  B  E  
 D  D  F  
 E  G  E  
 F  G  E  
-G  D  F  
+G  D  F 
+# 
 D  E  F  G
