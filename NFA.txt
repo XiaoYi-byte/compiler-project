@@ -1,14 +1,14 @@
-U l V
-W l X
-Y d Z
-[ # W
-[ # Y
-X # \
-Z # \
-] # [
-] # ^
-\ # ^
-\ # [
-V # ]
+A l B
+C l D
+E d F
+G # C
+G # E
+D # H
+F # H
+I # G
+I # J
+H # J
+H # G
+B # I
 &
-U ^
+A J

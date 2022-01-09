@@ -22,7 +22,6 @@ def pictureDFA():
         if all_status[i][0] not in stats:
             stats.append(all_status[i][0])
 
-    print(stats)
     dot = Digraph(name='DFA', format='png')
     for s in stats:
         dot.node(s, s)
@@ -32,7 +31,7 @@ def pictureDFA():
 
     for i in range(len(all_status) - 2):
         dot.edge(all_status[i][0], all_status[i][2], all_status[i][1])
-    dot.render('./picture/DFA.gv', view=True)
+    dot.render('./picture/DFA.gv')
 
 
 def pictureNFA():
@@ -57,7 +56,7 @@ def pictureNFA():
 
     for i in range(len(all_status) - 2):
         dot.edge(all_status[i][0], all_status[i][2], all_status[i][1])
-    dot.render('./picture/NFA.gv', view=True)
+    dot.render('./picture/NFA.gv')
 
 
 def pictureMinDFA():
@@ -85,7 +84,7 @@ def pictureMinDFA():
         for j in range(1, len(all_status[i]) - 1):
             if all_status[i][j] != '#':
                 dot.edge(all_status[i][0], all_status[i][j], all_status[0][j - 1])
-    dot.render('./picture/minDFA.gv', view=True)
+    dot.render('./picture/minDFA.gv')
 
 
 def draw():
@@ -94,13 +93,21 @@ def draw():
     pictureMinDFA()
     raw1 = Image.open("NFA.gv.png")
     raw2 = Image.open("DFA.gv.png")
-    raw3 = Image.open("minDFA.gv.png")
+    raw3 = Image.open("./picture/minDFA.gv.png")
     NFA = itk.PhotoImage(raw1.resize((200, 500)))
     DFA = itk.PhotoImage(raw2.resize((200, 500)))
     mDFA = itk.PhotoImage(raw3.resize((200, 500)))
-    cv1.create_image(2, 2, anchor=NW, image=NFA)
-    cv1.create_image(2, 2, anchor=NW, image=DFA)
-    cv1.create_image(2, 2, anchor=NW, image=mDFA)
+    pic1 = Canvas(frmR, bg='#87CEEB', width=200, height=500)
+    pic1.create_image(2, 2, anchor=NW, image=NFA)
+    pic1.grid(row=2, column=0, padx=10)
+
+    pic2 = Canvas(frmR, bg='#87CEEB', width=200, height=500)
+    pic2.create_image(2, 2, anchor=NW, image=DFA)
+    pic2.grid(row=2, column=1, padx=10)
+
+    pic3 = Canvas(frmR, bg='#87CEEB', width=200, height=500)
+    pic3.create_image(2, 2, anchor=NW, image=mDFA)
+    pic3.grid(row=2, column=2, padx=10)
 
 
 def save():
@@ -131,13 +138,15 @@ def save():
 
 def test():
     code = testCode.get()+'\n'
-    o = open("in.txt", 'w', encoding='utf-8')
+    o = open("./in.txt", 'w', encoding='utf-8')
     o.write(code)
     o.close()
-    time.sleep(5)
-    f = open("out.txt", 'r', encoding='utf-8')
+    # time.sleep(5)
+    f = open("./out.txt", 'r', encoding='utf-8')
     text = f.read()
+    print(text)
     res.insert('end', text)
+    res.grid(row=5, column=0, columnspan=2)
     f.close()
 
 
@@ -165,11 +174,11 @@ if __name__ == '__main__':
     Label(frmL, bg='#E6E6FA', font=('微软雅黑', 20, 'bold'), text='测试程序') \
         .grid(row=3, column=0)
     message = StringVar()
-    message.set('Enter Code Here:')
-    testCode = Entry(frmL, textvariable=message)
+    message.set("Result:")
+    testCode = Entry(frmL)
     testCode.grid(row=4, column=0, columnspan=2, padx=5, pady=5)
-    res = Listbox(frmL)
-    res.grid(row=5, column=0, columnspan=2, padx=10, pady=5)
+    res = Listbox(frmL, bg="#FFF0F5", listvariable=message)
+    res.grid(row=5, column=0, columnspan=2)
     testBtn = Button(frmL, text='测试代码', font='楷体', bg='#BDD6E5', borderwidth=2,
                      relief='groove', width=20, height=3, command=test).grid(row=6, column=0, columnspan=2, padx=5,
                                                                              pady=5)
@@ -186,21 +195,15 @@ if __name__ == '__main__':
     Label(frmR, bg='#D9FCFF', font=('微软雅黑', 20, 'bold'), text='RE->NFA->DFA->minDFA') \
         .grid(row=1, column=0, columnspan=3)
 
-    default_img = Image.open("img.png")
-    default = itk.PhotoImage(default_img.resize((200, 500)))
-
     cv1 = Canvas(frmR, bg='white', width=200, height=500)
-    cv1.create_image(2, 2, anchor=NW, image=default)
     cv1.grid(row=2, column=0, padx=10)
     Label(frmR, bg='#D9FCFF', font=('楷体', 20, 'bold'), text='NFA').grid(row=3, column=0, pady=5)
 
     cv2 = Canvas(frmR, bg='white', width=200, height=500)
-    cv2.create_image(2, 2, anchor=NW, image=default)
     cv2.grid(row=2, column=1, padx=10)
     Label(frmR, bg='#D9FCFF', font=('楷体', 20, 'bold'), text='DFA').grid(row=3, column=1, pady=5)
 
     cv3 = Canvas(frmR, bg='white', width=200, height=500)
-    cv3.create_image(2, 2, anchor=NW, image=default)
     cv3.grid(row=2, column=2, padx=10)
     Label(frmR, bg='#D9FCFF', font=('楷体', 20, 'bold'), text='minDFA').grid(row=3, column=2, pady=5)
 
