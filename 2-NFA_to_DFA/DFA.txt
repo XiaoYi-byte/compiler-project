@@ -1,10 +1,9 @@
-a  b  
-A  B  C  
-B  D  C  
-C  B  E  
-D  D  F  
-E  G  E  
-F  G  E  
-G  D  F 
-# 
-D  E  F  G
+A l B
+B l C
+B d D
+C l C
+C d D
+D l C
+D d D
+#
+B C D 
