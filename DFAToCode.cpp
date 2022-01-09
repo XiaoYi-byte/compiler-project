@@ -149,7 +149,7 @@ int DFA_to_code()
 	vector<string> Symbols;
 
 	ifstream file0;
-	file0.open("DK.txt");
+	file0.open("./file/DK.txt");
 	char c;
 	string str;
 	int type = 0;
@@ -206,7 +206,7 @@ int DFA_to_code()
 	}
 	ifstream file;
 	char ch1;
-	file.open("DFAmin.txt");
+	file.open("./file/DFAmin.txt");
 
 	vector<vector<char>> tagDFA;
 	vector<char> ROW;
@@ -274,7 +274,7 @@ int DFA_to_code()
 	vector<string> StrArray;
 	string Str;
 	char ch;
-	string path = "in.txt";
+	string path = "./file/in.txt";
 	while (_access(path.c_str(), 0) == -1)
 	{
 		cout << "waiting to input1" << endl;
@@ -283,7 +283,7 @@ int DFA_to_code()
 	ifstream in;
 	in.open(path, ios::in);
 	ofstream out;
-	out.open("out.txt", ios::out);
+	out.open("./file/out.txt", ios::out);
 	StrArray.clear();
 	Str.clear();
 	// out << "please input your code:" << endl;

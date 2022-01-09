@@ -105,8 +105,8 @@ int minimize_DFA()
 	edge *res = new edge[max]; //最小化结果的储存
 	ifstream fin;
 	ofstream fout;
-	fin.open("DFA.txt");
-	fout.open("DFAmin.txt");
+	fin.open("./file/DFA.txt");
+	fout.open("./file/DFAmin.txt");
 	if (!fin.is_open() || !fout.is_open())
 	{
 		cout << "cannot open the file" << endl;

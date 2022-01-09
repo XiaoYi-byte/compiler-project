@@ -76,7 +76,7 @@ int NFA_to_DFA()
 {
 	vector<vector<string>> input;
 
-	string filePath = "./NFA.txt";
+	string filePath = "./file/NFA.txt";
 	ifstream file;
 	file.open(filePath, ios::in);
 
@@ -293,7 +293,7 @@ int NFA_to_DFA()
 
 	// Output the result to a txt file, and use python to draw a picture according to the result
 	ofstream outfile;
-	outfile.open("DFA.txt");
+	outfile.open("./file/DFA.txt");
 	// cout << endl
 	// 	 << "DFA : " << endl;
 	// for (auto h : header)

@@ -1,6 +1,6 @@
-#include "header.h"
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <io.h>
 #include <unistd.h>
 using namespace std;
@@ -13,17 +13,24 @@ int main()
 {
 	while (1)
 	{
-		string path = "input.txt";
+		string path = "./file/input.txt";
+		// ifstream file;
+		// file.open(path, ios::in);
 		while (_access(path.c_str(), 0) == -1)
 		{
 			cout << "waiting to input" << endl;
 			sleep(1);
 		}
+		string path1 = "./file/NFA.txt";
+		// ifstream file;
+		// file.open(path, ios::in);
+		if (_access(path1.c_str(), 0) != -1)
+			remove(path1.c_str());
 		to_NFA(path);
 		NFA_to_DFA();
 		minimize_DFA();
 		DFA_to_code();
-		remove(path.c_str());
+		sleep(1);
 	}
 	return 0;
 }

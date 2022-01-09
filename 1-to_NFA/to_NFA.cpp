@@ -1,485 +1,502 @@
-#include<string>
-#include<iostream>
-#include<stack>
-#include<fstream>
+#include <string>
+#include <iostream>
+#include <stack>
+#include <fstream>
 using namespace std;
 
-const int MaxNum = 150;//×Ô¶¨Òå×î´ó±ßÊı
+const int MaxNum = 150; //è‡ªå®šä¹‰æœ€å¤§è¾¹æ•°
 
-//³õÊ¼»¯ÊäÈëÄ£¿éÓÃµ½µÄº¯Êı
-void putin(string&);
-bool islegal(string);  //ÅĞ¶Ï×Ö·û´®µÄºÏÀíĞÔ
+//åˆå§‹åŒ–è¾“å…¥æ¨¡å—ç”¨åˆ°çš„å‡½æ•°
+void putin(string &);
+bool islegal(string); //åˆ¤æ–­å­—ç¬¦ä¸²çš„åˆç†æ€§
 bool legal_char(string);
 bool is_letter(char);
 bool is_operator(char);
 bool legal_match(string);
 
-//±í´ïÊ½¼Ó+Ô¤´¦Àí
+//è¡¨è¾¾å¼åŠ +é¢„å¤„ç†
 string addplus(string);
 
-//ÖĞ×º±í´ïÊ½×ªºó×º±í´ïÊ½
+//ä¸­ç¼€è¡¨è¾¾å¼è½¬åç¼€è¡¨è¾¾å¼
 int isp(char);
 int osp(char);
 string convert(string);
 
-
-//¶¨ÒåNFAÖĞµÄÏà¹ØĞÅÏ¢
-//½Úµã
+//å®šä¹‰NFAä¸­çš„ç›¸å…³ä¿¡æ¯
+//èŠ‚ç‚¹
 struct Node
 {
-    string name;
+	string name;
 };
 
-//±ß
+//è¾¹
 struct Edge
 {
-    Node start;
-    Node end;
-    char symbol;  //×ª»¯·ûºÅ
+	Node start;
+	Node end;
+	char symbol; //è½¬åŒ–ç¬¦å·
 };
 
-//¸÷¸ö×é·Ö
+//å„ä¸ªç»„åˆ†
 struct Cell
 {
-    Edge edgeset[MaxNum];  //±ß¼¯ºÏ
-    Node startnode;
-    Node endnode;
-    int edgenumber; //±ßÊı
+	Edge edgeset[MaxNum]; //è¾¹é›†åˆ
+	Node startnode;
+	Node endnode;
+	int edgenumber; //è¾¹æ•°
 };
 
 Cell toNFA(string);
 Node AddNode();
 Cell op_letter(char);
-Cell op_plus(Cell,Cell);
-Cell op_or(Cell,Cell);
+Cell op_plus(Cell, Cell);
+Cell op_or(Cell, Cell);
 Cell op_close(Cell);
 
-void copyedge(Cell&,Cell);
+void copyedge(Cell &, Cell);
 
 int show(Cell);
 
-int StateNum=0;
+int StateNum = 0;
 
-void putin(string& sentence)
+void putin(string &sentence)
 {
-    cout << "Please enter the expression:";
-    cin >> sentence;
-    while (!islegal(sentence))
-    {
-        cout << "ÊäÈëµÄ±í´ïÊ½·Ç·¨£¬ÇëÖØĞÂÊäÈë£º";
-        cin >> sentence;
-    }
-
+	cout << "Please enter the expression:";
+	cin >> sentence;
+	while (!islegal(sentence))
+	{
+		cout << "è¾“å…¥çš„è¡¨è¾¾å¼éæ³•ï¼Œè¯·é‡æ–°è¾“å…¥ï¼š";
+		cin >> sentence;
+	}
 }
 
 bool islegal(string sentence)
 {
-    int length = sentence.size();
-    //±£Ö¤Ã¿¸ö×Ö·ûÊÇºÏ·¨µÄ£¬Í¬Ê±À¨ºÅÒªÆ¥Åä  
-    if ((!legal_char(sentence)) || (!legal_match(sentence)))
-    {
-        return false;
-    }
-    return true;
+	int length = sentence.size();
+	//ä¿è¯æ¯ä¸ªå­—ç¬¦æ˜¯åˆæ³•çš„ï¼ŒåŒæ—¶æ‹¬å·è¦åŒ¹é…
+	if ((!legal_char(sentence)) || (!legal_match(sentence)))
+	{
+		return false;
+	}
+	return true;
 }
 
 bool is_letter(char c)
 {
-    if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) return true;
-    else  return false;
+	if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z')))
+		return true;
+	else
+		return false;
 }
 
 bool is_operator(char c)
 {
-    if ((c == '(') || (c == ')') || (c == '|') || (c == '*')) return true;
-    else return false;
+	if ((c == '(') || (c == ')') || (c == '|') || (c == '*'))
+		return true;
+	else
+		return false;
 }
-
 
 bool legal_char(string s)
 {
-    for (int i = 0; i < s.size(); i++)
-    {
-        char c = s[i];
-        if ( !is_letter(c)&& !is_operator(c) )  return false;
-    }
-    return true;
+	for (int i = 0; i < s.size(); i++)
+	{
+		char c = s[i];
+		if (!is_letter(c) && !is_operator(c))
+			return false;
+	}
+	return true;
 }
 
 bool legal_match(string s)
 {
-    stack<char> STACK;
-    for (int i = 0; i < s.size(); i++)
-    {
-        char c = s[i];
-        if (c == '(') STACK.push(c);
-        if (c == ')')
-        {
-            if (!STACK.empty()&& STACK.top() == '(') STACK.pop();
-            else
-            {
-                cout << "ÎŞÆ¥ÅäµÄ×óÀ¨ºÅ(" << endl;
-                return false;
-            }
-        }
-    }
-    if (!STACK.empty())
-    {
-        cout << "ÎŞÆ¥ÅäµÄÓÒÀ¨ºÅ)" << endl;
-        return false;
-    }
+	stack<char> STACK;
+	for (int i = 0; i < s.size(); i++)
+	{
+		char c = s[i];
+		if (c == '(')
+			STACK.push(c);
+		if (c == ')')
+		{
+			if (!STACK.empty() && STACK.top() == '(')
+				STACK.pop();
+			else
+			{
+				cout << "æ— åŒ¹é…çš„å·¦æ‹¬å·(" << endl;
+				return false;
+			}
+		}
+	}
+	if (!STACK.empty())
+	{
+		cout << "æ— åŒ¹é…çš„å³æ‹¬å·)" << endl;
+		return false;
+	}
 
-    return true;
-
+	return true;
 }
-
-
 
 string addplus(string s)
 {
-    string final;
-    for (int i = 0, j = 1; j < s.size(); i++, j++)  //¸øÁ½¸ö¼à²âÖ¸Õë
-    {
-        if (is_letter(s[i]) && is_letter(s[j])) final = final + s[i] + '+';  //Á½¸ö×ÖÄ¸ÏàÁÚÖĞ¼ä¼Ó+
-        else if (s[i] == '*' && is_letter(s[j]))  final = final + s[i] + '+';
-        else if (s[i] == ')' && is_letter(s[j]))  final = final + s[i] + '+';
-        else if (s[i]==')' && s[j] == '(')  final = final + s[i] + '+';   //×ÖÄ¸¼Ó(Çé¿öÏÂÖĞ¼ä¼Ó+
-        else if (s[i] == '*' && s[j] == '(')  final = final + s[i] + '+';
-        else if (is_letter(s[i]) && s[j] == '(')  final = final + s[i] + '+';
+	string final;
+	for (int i = 0, j = 1; j < s.size(); i++, j++) //ç»™ä¸¤ä¸ªç›‘æµ‹æŒ‡é’ˆ
+	{
+		if (is_letter(s[i]) && is_letter(s[j]))
+			final = final + s[i] + '+'; //ä¸¤ä¸ªå­—æ¯ç›¸é‚»ä¸­é—´åŠ +
+		else if (s[i] == '*' && is_letter(s[j]))
+			final = final + s[i] + '+';
+		else if (s[i] == ')' && is_letter(s[j]))
+			final = final + s[i] + '+';
+		else if (s[i] == ')' && s[j] == '(')
+			final = final + s[i] + '+'; //å­—æ¯åŠ (æƒ…å†µä¸‹ä¸­é—´åŠ +
+		else if (s[i] == '*' && s[j] == '(')
+			final = final + s[i] + '+';
+		else if (is_letter(s[i]) && s[j] == '(')
+			final = final + s[i] + '+';
 
-        else  final = final + s[i];
-    }
-    final = final + s[s.size() - 1];  //×îºóÒ»Ïî×îºó¼ÓÉÏ
-    
-    return final;
+		else
+			final = final + s[i];
+	}
+	final = final + s[s.size() - 1]; //æœ€åä¸€é¡¹æœ€ååŠ ä¸Š
+
+	return final;
 }
 
-int isp(char c)  //Õ»ÄÚÓÅÏÈ¼¶
+int isp(char c) //æ ˆå†…ä¼˜å…ˆçº§
 {
-    switch(c)
-    {
-        case '#': return 0;
-        case '(': return 1;
-        case '*':return 7;
-        case '|':return 5;
-        case '+':return 3;
-        case ')':return 8;  //Õ»ÄÚ²»»á³öÏÖÓÒÀ¨ºÅ£¿
-        default:
-        cout<<"error"<<endl;  //ÀíÂÛÉÏ²»»á³öÏÖÆäËû·Ç·¨×Ö·û
-        return false;
-    }
+	switch (c)
+	{
+	case '#':
+		return 0;
+	case '(':
+		return 1;
+	case '*':
+		return 7;
+	case '|':
+		return 5;
+	case '+':
+		return 3;
+	case ')':
+		return 8; //æ ˆå†…ä¸ä¼šå‡ºç°å³æ‹¬å·ï¼Ÿ
+	default:
+		cout << "error" << endl; //ç†è®ºä¸Šä¸ä¼šå‡ºç°å…¶ä»–éæ³•å­—ç¬¦
+		return false;
+	}
 }
 
 int osp(char c)
 {
-    switch(c)
-    {
-        case '#': return 0;
-        case '(': return 8;
-        case '*':return 6; //ÏàÍ¬ÔËËã·ûÈÔ²»ÈëÕ»
-        case '|':return 4;
-        case '+':return 2;
-        case ')':return 1;  //Õ»ÄÚ²»»á³öÏÖÓÒÀ¨ºÅ£¿
-        default:
-        cout<<"error"<<endl;  //ÀíÂÛÉÏ²»»á³öÏÖÆäËû·Ç·¨×Ö·û
-        return false;
-    }
+	switch (c)
+	{
+	case '#':
+		return 0;
+	case '(':
+		return 8;
+	case '*':
+		return 6; //ç›¸åŒè¿ç®—ç¬¦ä»ä¸å…¥æ ˆ
+	case '|':
+		return 4;
+	case '+':
+		return 2;
+	case ')':
+		return 1; //æ ˆå†…ä¸ä¼šå‡ºç°å³æ‹¬å·ï¼Ÿ
+	default:
+		cout << "error" << endl; //ç†è®ºä¸Šä¸ä¼šå‡ºç°å…¶ä»–éæ³•å­—ç¬¦
+		return false;
+	}
 }
 
 string convert(string s)
 {
-    string final;
-    char temp;
-    stack<char> sign;
-    sign.push('#');
-    int length=s.size();
-    for(int i=0;i<length;i++)
-    {
-        if(is_letter(s[i])) final+=s[i];  //Èç¹ûÊÇ·ÇÔËËã·ûÖ±½Ó¼ÓÈë×îÖÕ×Ö·û´®
-        else
-        {
-            while(osp(s[i])<isp(sign.top()))  //²»·ûºÏÌõ¼ş¾ÍÒ»Ö±pop
-            {
-                temp=sign.top();
-                sign.pop();
-                final+=temp;
-            }
-            if(s[i]!=')') sign.push(s[i]);
-            else sign.pop();  //Èç¹ûÊÇÓÒÀ¨ºÅµÄ»°£¬Õ»¶¥Ò»¶¨ÊÇ×óÀ¨ºÅ£¬Ò²µ¯³öÀ´
-        }
-    }
-    while(sign.top()!='#')   //°Ñ·ûºÅÕ»ÀïÃæ¿ÉÄÜµÄÔËËã·û¶¼pop³öÀ´¼Óµ½finalºóÃæ
-    {
-        temp=sign.top();
-        sign.pop();
-        final+=temp;
-    }
-//    cout << final << endl;
-    return final;
+	string final;
+	char temp;
+	stack<char> sign;
+	sign.push('#');
+	int length = s.size();
+	for (int i = 0; i < length; i++)
+	{
+		if (is_letter(s[i]))
+			final += s[i]; //å¦‚æœæ˜¯éè¿ç®—ç¬¦ç›´æ¥åŠ å…¥æœ€ç»ˆå­—ç¬¦ä¸²
+		else
+		{
+			while (osp(s[i]) < isp(sign.top())) //ä¸ç¬¦åˆæ¡ä»¶å°±ä¸€ç›´pop
+			{
+				temp = sign.top();
+				sign.pop();
+				final += temp;
+			}
+			if (s[i] != ')')
+				sign.push(s[i]);
+			else
+				sign.pop(); //å¦‚æœæ˜¯å³æ‹¬å·çš„è¯ï¼Œæ ˆé¡¶ä¸€å®šæ˜¯å·¦æ‹¬å·ï¼Œä¹Ÿå¼¹å‡ºæ¥
+		}
+	}
+	while (sign.top() != '#') //æŠŠç¬¦å·æ ˆé‡Œé¢å¯èƒ½çš„è¿ç®—ç¬¦éƒ½popå‡ºæ¥åŠ åˆ°finalåé¢
+	{
+		temp = sign.top();
+		sign.pop();
+		final += temp;
+	}
+	//    cout << final << endl;
+	return final;
 }
-
 
 Cell toNFA(string s)
 {
-    int length=s.size();
-    stack<Cell> cstack;
-    Cell temp,cell1,cell2; 
-    for (int i=0;i<length;i++)
-    {
-        if(is_letter(s[i])) temp=op_letter(s[i]); 
-        else if(s[i]=='+')
-        {
-            cell1=cstack.top();
-            cstack.pop();
-            cell2=cstack.top();
-            cstack.pop();
-            temp=op_plus(cell2,cell1);
-        }
-        else if(s[i]=='|') 
-        {
-            cell1=cstack.top();
-            cstack.pop();
-            cell2=cstack.top();
-            cstack.pop();
-            temp=op_or(cell2,cell1);
-        }
-        else if(s[i]=='*')
-        {
-            cell1=cstack.top();
-            cstack.pop();
-            temp=op_close(cell1);
-        }
-        else 
-        {
-            cout<<"error"<<endl;
-      //      return false;
-        }
-        cstack.push(temp);
-    }
-    temp=cstack.top();
-    cstack.pop();
-    return temp;
+	int length = s.size();
+	stack<Cell> cstack;
+	Cell temp, cell1, cell2;
+	for (int i = 0; i < length; i++)
+	{
+		if (is_letter(s[i]))
+			temp = op_letter(s[i]);
+		else if (s[i] == '+')
+		{
+			cell1 = cstack.top();
+			cstack.pop();
+			cell2 = cstack.top();
+			cstack.pop();
+			temp = op_plus(cell2, cell1);
+		}
+		else if (s[i] == '|')
+		{
+			cell1 = cstack.top();
+			cstack.pop();
+			cell2 = cstack.top();
+			cstack.pop();
+			temp = op_or(cell2, cell1);
+		}
+		else if (s[i] == '*')
+		{
+			cell1 = cstack.top();
+			cstack.pop();
+			temp = op_close(cell1);
+		}
+		else
+		{
+			cout << "error" << endl;
+			//      return false;
+		}
+		cstack.push(temp);
+	}
+	temp = cstack.top();
+	cstack.pop();
+	return temp;
 }
 
 Node AddNode()
 {
-    Node newnode;
-    newnode.name=StateNum+65;  //×ª»¯³É´óĞ´×ÖÄ¸
-    StateNum++; 
-    return newnode;
+	Node newnode;
+	newnode.name = StateNum + 65; //è½¬åŒ–æˆå¤§å†™å­—æ¯
+	StateNum++;
+	return newnode;
 }
 
 Cell op_letter(char c)
 {
-    Cell cell;
-    cell.edgenumber=0;
-    Edge edge;
+	Cell cell;
+	cell.edgenumber = 0;
+	Edge edge;
 
-    //Ê×ÏÈÉú³É½Úµã
-    Node st=AddNode();
-    Node en=AddNode();
+	//é¦–å…ˆç”ŸæˆèŠ‚ç‚¹
+	Node st = AddNode();
+	Node en = AddNode();
 
-    //±ß
-    edge.start=st;
-    edge.end=en;
-    edge.symbol=c;
+	//è¾¹
+	edge.start = st;
+	edge.end = en;
+	edge.symbol = c;
 
-    //Ä£¿é
-    cell.edgeset[cell.edgenumber++]=edge;
-    cell.startnode=cell.edgeset[0].start;
-    cell.endnode=cell.edgeset[0].end;
+	//æ¨¡å—
+	cell.edgeset[cell.edgenumber++] = edge;
+	cell.startnode = cell.edgeset[0].start;
+	cell.endnode = cell.edgeset[0].end;
 
- //   cout << "µ¥×Ö·ûÄ£¿éµÄÊ×½áµãÊÇ£º" << cell.startnode.name << endl;
-  //  cout << "µ¥×Ö·ûÄ£¿éµÄÎ²½áµãÊÇ£º" << cell.endnode.name << endl;
+	//   cout << "å•å­—ç¬¦æ¨¡å—çš„é¦–ç»“ç‚¹æ˜¯ï¼š" << cell.startnode.name << endl;
+	//  cout << "å•å­—ç¬¦æ¨¡å—çš„å°¾ç»“ç‚¹æ˜¯ï¼š" << cell.endnode.name << endl;
 
-    return cell;
+	return cell;
 }
 
-Cell op_plus(Cell c1,Cell c2)
+Cell op_plus(Cell c1, Cell c2)
 {
-    Cell cell;
-    cell.edgenumber=0;
-    Edge edge;
+	Cell cell;
+	cell.edgenumber = 0;
+	Edge edge;
 
-    //±ßµÄ´¦Àí
-    copyedge(cell,c1);
-    copyedge(cell,c2);
+	//è¾¹çš„å¤„ç†
+	copyedge(cell, c1);
+	copyedge(cell, c2);
 
-    edge.start=c1.endnode;   //ÕâÀïµÄÕâÖÖ±íÊöºÍc1.endnodeµÈ¼ÛÂğ£¿
-    edge.end=c2.startnode;
-    edge.symbol='#';
+	edge.start = c1.endnode; //è¿™é‡Œçš„è¿™ç§è¡¨è¿°å’Œc1.endnodeç­‰ä»·å—ï¼Ÿ
+	edge.end = c2.startnode;
+	edge.symbol = '#';
 
-    //cellµÄ´¦Àí
-    cell.startnode=c1.startnode;
-    cell.endnode=c2.endnode;
+	// cellçš„å¤„ç†
+	cell.startnode = c1.startnode;
+	cell.endnode = c2.endnode;
 
-    cell.edgeset[cell.edgenumber++]=edge;
+	cell.edgeset[cell.edgenumber++] = edge;
 
- //   cout << "¼Ó·¨ÔËËãµÄÊ×½áµãÊÇ£º" << cell.startnode.name << endl;
-  //  cout << "¼Ó·¨ÔËËãµÄÎ²½áµãÊÇ£º" << cell.endnode.name << endl;
+	//   cout << "åŠ æ³•è¿ç®—çš„é¦–ç»“ç‚¹æ˜¯ï¼š" << cell.startnode.name << endl;
+	//  cout << "åŠ æ³•è¿ç®—çš„å°¾ç»“ç‚¹æ˜¯ï¼š" << cell.endnode.name << endl;
 
-    return cell;
-
+	return cell;
 }
 
-Cell op_or(Cell c1,Cell c2)
+Cell op_or(Cell c1, Cell c2)
 {
-    Cell cell;
-    cell.edgenumber=0;
-    Edge edge1,edge2,edge3,edge4;
+	Cell cell;
+	cell.edgenumber = 0;
+	Edge edge1, edge2, edge3, edge4;
 
-    //Ê×ÏÈÉú³ÉÊ×Î²½Úµã
-    Node st=AddNode();
-    Node en=AddNode();
+	//é¦–å…ˆç”Ÿæˆé¦–å°¾èŠ‚ç‚¹
+	Node st = AddNode();
+	Node en = AddNode();
 
-    //±ßµÄ´¦Àí
-    copyedge(cell,c1);
-    copyedge(cell,c2);
+	//è¾¹çš„å¤„ç†
+	copyedge(cell, c1);
+	copyedge(cell, c2);
 
-    edge1.start=st;
-    edge1.end=c1.edgeset[0].start;
-    edge1.symbol='#';
+	edge1.start = st;
+	edge1.end = c1.edgeset[0].start;
+	edge1.symbol = '#';
 
-    edge2.start=st;
-    edge2.end=c2.edgeset[0].start;
-    edge2.symbol='#';
-    
-    edge3.start=c1.edgeset[c1.edgenumber-1].end;
-    edge3.end=en;
-    edge3.symbol='#';
+	edge2.start = st;
+	edge2.end = c2.edgeset[0].start;
+	edge2.symbol = '#';
 
-    edge4.start=c2.edgeset[c2.edgenumber-1].end;
-    edge4.end=en;
-    edge4.symbol='#';
+	edge3.start = c1.edgeset[c1.edgenumber - 1].end;
+	edge3.end = en;
+	edge3.symbol = '#';
 
-    //cellµÄ´¦Àí
-    cell.startnode=st;
-    cell.endnode=en;
-    
-    cell.edgeset[cell.edgenumber++]=edge1;
-    cell.edgeset[cell.edgenumber++]=edge2;
-    cell.edgeset[cell.edgenumber++]=edge3;
-    cell.edgeset[cell.edgenumber++]=edge4;
+	edge4.start = c2.edgeset[c2.edgenumber - 1].end;
+	edge4.end = en;
+	edge4.symbol = '#';
 
- //   cout << "»òÔËËãµÄÊ×½áµãÊÇ£º" << cell.startnode.name << endl;
-   // cout << "»òÔËËãµÄÎ²½áµãÊÇ£º" << cell.endnode.name << endl;
+	// cellçš„å¤„ç†
+	cell.startnode = st;
+	cell.endnode = en;
 
-    return cell;
+	cell.edgeset[cell.edgenumber++] = edge1;
+	cell.edgeset[cell.edgenumber++] = edge2;
+	cell.edgeset[cell.edgenumber++] = edge3;
+	cell.edgeset[cell.edgenumber++] = edge4;
 
+	//   cout << "æˆ–è¿ç®—çš„é¦–ç»“ç‚¹æ˜¯ï¼š" << cell.startnode.name << endl;
+	// cout << "æˆ–è¿ç®—çš„å°¾ç»“ç‚¹æ˜¯ï¼š" << cell.endnode.name << endl;
+
+	return cell;
 }
 
 Cell op_close(Cell c)
 {
-    Cell cell;
-    cell.edgenumber=0;
-    Edge edge1,edge2,edge3,edge4;
+	Cell cell;
+	cell.edgenumber = 0;
+	Edge edge1, edge2, edge3, edge4;
 
-    //Ê×ÏÈÉú³ÉÊ×Î²½Úµã
-    Node st=AddNode();
-    Node en=AddNode();
+	//é¦–å…ˆç”Ÿæˆé¦–å°¾èŠ‚ç‚¹
+	Node st = AddNode();
+	Node en = AddNode();
 
-    //±ßµÄ´¦Àí
-    edge1.start=st;
-    edge1.end=c.startnode;
-    edge1.symbol='#';
+	//è¾¹çš„å¤„ç†
+	edge1.start = st;
+	edge1.end = c.startnode;
+	edge1.symbol = '#';
 
-    edge2.start=st;
-    edge2.end=en;
-    edge2.symbol='#';
-    
-    edge3.start=c.endnode;
-    edge3.end=en;
-    edge3.symbol='#';
+	edge2.start = st;
+	edge2.end = en;
+	edge2.symbol = '#';
 
-    edge4.start=c.endnode;
-    edge4.end=c.startnode;
-    edge4.symbol='#';
+	edge3.start = c.endnode;
+	edge3.end = en;
+	edge3.symbol = '#';
 
-    copyedge(cell,c);
+	edge4.start = c.endnode;
+	edge4.end = c.startnode;
+	edge4.symbol = '#';
 
-    //cellµÄ´¦Àí
-    cell.startnode=st;
-    cell.endnode=en;
-    
-    cell.edgeset[cell.edgenumber++]=edge1;
-    cell.edgeset[cell.edgenumber++]=edge2;
-    cell.edgeset[cell.edgenumber++]=edge3;
-    cell.edgeset[cell.edgenumber++]=edge4;
+	copyedge(cell, c);
 
-  //  cout << "±Õ°üÔËËãµÄÊ×½áµãÊÇ£º" << cell.startnode.name << endl;
-  //  cout<< "±Õ°üÔËËãµÄÎ²½áµãÊÇ£º" << cell.endnode.name << endl;
+	// cellçš„å¤„ç†
+	cell.startnode = st;
+	cell.endnode = en;
 
-    return cell;
+	cell.edgeset[cell.edgenumber++] = edge1;
+	cell.edgeset[cell.edgenumber++] = edge2;
+	cell.edgeset[cell.edgenumber++] = edge3;
+	cell.edgeset[cell.edgenumber++] = edge4;
+
+	//  cout << "é—­åŒ…è¿ç®—çš„é¦–ç»“ç‚¹æ˜¯ï¼š" << cell.startnode.name << endl;
+	//  cout<< "é—­åŒ…è¿ç®—çš„å°¾ç»“ç‚¹æ˜¯ï¼š" << cell.endnode.name << endl;
+
+	return cell;
 }
 
-
-void copyedge(Cell& final,Cell origin)
+void copyedge(Cell &final, Cell origin)
 {
-    int fnumber=final.edgenumber;
-    int onumber=origin.edgenumber;
+	int fnumber = final.edgenumber;
+	int onumber = origin.edgenumber;
 
-    for(int i=0;i<onumber;i++)
-    {
-        final.edgeset[fnumber+i]=origin.edgeset[i];
-    }
-    final.edgenumber=fnumber+onumber;
+	for (int i = 0; i < onumber; i++)
+	{
+		final.edgeset[fnumber + i] = origin.edgeset[i];
+	}
+	final.edgenumber = fnumber + onumber;
 }
-
 
 int show(Cell c)
 {
-	ofstream outfile("f1.txt",ios::out|ios::app);
-	if(!outfile.is_open())
+	ofstream outfile("f1.txt", ios::out | ios::app);
+	if (!outfile.is_open())
 	{
-		cout<<"open error!"<<endl;
+		cout << "open error!" << endl;
 		return -1;
 	}
 	for (int i = 0; i < c.edgenumber; i++)
-    {
-    	outfile<< c.edgeset[i].start.name<<" "<<c.edgeset[i].symbol<<" "<<c.edgeset[i].end.name<<endl;
-    }
-    outfile<< "&"<<endl;
-    outfile<<c.startnode.name<<" "<<c.endnode.name<<endl;
-    outfile<<endl;
-    
-    outfile.close();
-    return 0;
-}
+	{
+		outfile << c.edgeset[i].start.name << " " << c.edgeset[i].symbol << " " << c.edgeset[i].end.name << endl;
+	}
+	outfile << "&" << endl;
+	outfile << c.startnode.name << " " << c.endnode.name << endl;
+	outfile << endl;
 
+	outfile.close();
+	return 0;
+}
 
 int main()
 {
 	Cell cell;
 	string line;
-//´ÓÎÄ¼ş¶Á 
+	//ä»æ–‡ä»¶è¯»
 	ifstream myfile;
 	myfile.open("input.txt");
-	if(myfile)
+	if (myfile)
 	{
-	    while(getline(myfile,line))
+		while (getline(myfile, line))
 		{
-			while (!islegal(line))  
-            {
-                cout << "illegal expression,error!";
-                return -1;
-            }
-		    line=addplus(line);  //¶Ô³õÊ¼¾ä×Ó½øĞĞ¼Ó+´¦Àí£¬µÃµ½sentence1£»
-            line=convert(line);  //ÖĞ×º×ªºó×º
-            cell=toNFA(line);
-            show(cell);
+			while (!islegal(line))
+			{
+				cout << "illegal expression,error!";
+				return -1;
+			}
+			line = addplus(line); //å¯¹åˆå§‹å¥å­è¿›è¡ŒåŠ +å¤„ç†ï¼Œå¾—åˆ°sentence1ï¼›
+			line = convert(line); //ä¸­ç¼€è½¬åç¼€
+			cell = toNFA(line);
+			show(cell);
 		}
 	}
 	myfile.close();
-	
-//¿ØÖÆÌ¨¶Á 
-   /*
-    string sentence= "(a|b)*abb";
-    putin(sentence);
-    sentence=addplus(sentence);  //¶Ô³õÊ¼¾ä×Ó½øĞĞ¼Ó+´¦Àí£¬µÃµ½sentence1£»
-    sentence=convert(sentence);  //ÖĞ×º×ªºó×º
-    cell=toNFA(sentence);
-    show(cell);
-    */
-    return 0;
 
+	//æ§åˆ¶å°è¯»
+	/*
+	 string sentence= "(a|b)*abb";
+	 putin(sentence);
+	 sentence=addplus(sentence);  //å¯¹åˆå§‹å¥å­è¿›è¡ŒåŠ +å¤„ç†ï¼Œå¾—åˆ°sentence1ï¼›
+	 sentence=convert(sentence);  //ä¸­ç¼€è½¬åç¼€
+	 cell=toNFA(sentence);
+	 show(cell);
+	 */
+	return 0;
 }

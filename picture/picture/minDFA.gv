@@ -1,8 +1,0 @@
-digraph minDFA {
-	P [label=P]
-	Q [label=Q]
-	Q [label=Q shape=doublecircle]
-	P -> Q [label=l]
-	Q -> Q [label=l]
-	Q -> Q [label=d]
-}
