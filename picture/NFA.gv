@@ -1,0 +1,38 @@
+digraph NFA {
+	A [label=A]
+	C [label=C]
+	E [label=E]
+	G [label=G]
+	D [label=D]
+	F [label=F]
+	I [label=I]
+	H [label=H]
+	B [label=B]
+	J
+ [label=J
+ shape=doublecircle]
+	A -> B
+ [label=l]
+	C -> D
+ [label=l]
+	E -> F
+ [label=d]
+	G -> C
+ [label="#"]
+	G -> E
+ [label="#"]
+	D -> H
+ [label="#"]
+	F -> H
+ [label="#"]
+	I -> G
+ [label="#"]
+	I -> J
+ [label="#"]
+	H -> J
+ [label="#"]
+	H -> G
+ [label="#"]
+	B -> I
+ [label="#"]
+}

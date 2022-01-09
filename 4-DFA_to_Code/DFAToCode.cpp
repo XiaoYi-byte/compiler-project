@@ -109,12 +109,12 @@ bool checkDFA(vector<vector<char>> DFA, vector<char> fStates, string Str ,int ty
     return isRead;
 }
 
-int main() {
+int DFA_to_code() {
     vector<string> KeyWords = { "PROGRAM","BEGIN","END","CONST","VAR","WHILE","DO","IF","THEN" };
     vector<string> Symbols = { ":","+","-","*","/",":=","=","<>",">",">=","<","<=","(",")",";","," };
     ifstream file;
     char ch1;
-    file.open("C:\\Users\\lenovo\\Desktop\\DFAmin.txt");
+    file.open("DFAmin.txt");
 
     vector<vector<char>> tagDFA;
     vector<char> ROW;

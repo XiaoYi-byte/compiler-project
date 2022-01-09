@@ -98,8 +98,8 @@ int main()
     edge *b = new edge[max];
     edge *res = new edge[max];  //最小化结果的储存
     ifstream fin;ofstream fout;
-    fin.open("/Users/spica/Documents/GitHub/compiler-project/3-DFA_minimize/DFA.txt");
-    fout.open("/Users/spica/Documents/GitHub/compiler-project/3-DFA_minimize/DFAmin.txt");
+    fin.open("DFA.txt");
+    fout.open("DFAmin.txt");
     if(!fin.is_open() || !fout.is_open())
     {
         cout<<"cannot open the file"<<endl;
