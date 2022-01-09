@@ -440,21 +440,41 @@ int show(Cell c)
     }
     outfile<< "&"<<endl;
     outfile<<c.startnode.name<<" "<<c.endnode.name<<endl;
+    outfile<<endl;
     
+    outfile.close();
     return 0;
 }
 
 
 int main()
 {
-    Cell cell;
+	Cell cell;
+	string line;
+//从文件读 
+	ifstream myfile;
+	myfile.open("1.txt");
+	if(myfile)
+	{
+	    while(getline(myfile,line))
+		{
+        line=addplus(line);  //对初始句子进行加+处理，得到sentence1；
+        line=convert(line);  //中缀转后缀
+        cell=toNFA(line);
+        show(cell);
+		}
+	}
+	myfile.close();
+	
+//控制台读 
+   /*
     string sentence= "(a|b)*abb";
     putin(sentence);
     sentence=addplus(sentence);  //对初始句子进行加+处理，得到sentence1；
     sentence=convert(sentence);  //中缀转后缀
     cell=toNFA(sentence);
     show(cell);
-
+*/
     return 0;
 
 }
