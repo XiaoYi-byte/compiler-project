@@ -5,9 +5,9 @@
 #include <sstream>
 #include <algorithm>
 #include <map>
-#include<fstream>
+#include <set>
+#include <fstream>
 using namespace std;
-
 
 // spilt the string
 vector<string> split(const string &str, const char pattern)
@@ -37,16 +37,18 @@ string get_closure(const vector<vector<string>> input, string status, int empty_
 	for (int i = 0; i < split_status.size(); i++)
 	{
 		int cur_pos = state_to_index(input, split_status[i]);
-		while (input[cur_pos][empty_index] != "Φ")
+		if (input[cur_pos][empty_index] != "Φ" && cur_pos != 0)
 		{
 			string next_status = input[cur_pos][empty_index].substr(1, input[cur_pos][empty_index].size() - 2);
-			if (!count(split_status.begin(), split_status.end(), next_status)) // Does not include the state s
+			vector<string> stats = split(next_status, ',');
+			for (auto s : stats)
 			{
-				result.append(",");
-				result.append(next_status);
-				split_status.push_back(next_status);
+				if (!count(split_status.begin(), split_status.end(), s)) // Does not include the state s
+				{
+					result.append(",").append(s);
+					split_status.push_back(s);
+				}
 			}
-			cur_pos = state_to_index(input, next_status);
 		}
 	}
 	return result;
@@ -72,17 +74,98 @@ bool compare_vector(string src, string dst)
 
 int main()
 {
-	const vector<vector<string>> input = {
-		{"state", "a", "b", "ε"},
-		{"X", "Φ", "Φ", "{5}"},
-		{"1", "{3}", "{4}", "Φ"},
-		{"2", "Φ", "Φ", "{6}"},
-		{"3", "{2}", "Φ", "Φ"},
-		{"4", "Φ", "{1,2}", "Φ"},
-		{"5", "{5}", "{5}", "{1}"},
-		{"6", "{6}", "{6}", "{Y}"},
-		{"Y", "Φ", "Φ", "Φ"}}; // "Φ" indicates that the status is empty
+	vector<vector<string>> input;
 
+	string filePath = "./NFA.txt";
+	ifstream file;
+	file.open(filePath, ios::in);
+
+	if (!file.is_open())
+		return 0;
+
+	string strLine;
+	vector<vector<string>> all;
+	while (getline(file, strLine))
+	{
+		if (strLine.empty())
+			continue;
+		vector<string> row = split(strLine, ' ');
+		all.push_back(row);
+	}
+	vector<int> deIndex;
+	for (int i = 0; i < all.size(); i++)
+	{
+		int j = i + 1;
+		if (j < all.size() - 1 && all[i][0] == all[j][0] && all[i][1] == all[j][1])
+		{
+			while (j < all.size() - 1 && all[i][0] == all[j][0] && all[i][1] == all[j][1])
+			{
+				deIndex.push_back(j);
+				all[i][2].append(",").append(all[j][2]);
+				j++;
+			}
+		}
+		i = j - 1;
+	}
+	for (int i = 0; i < deIndex.size(); i++)
+		deIndex[i] = deIndex[i] - i;
+
+	for (auto d : deIndex)
+		all.erase(all.begin() + d);
+	// get all the symbols
+	vector<string> syms;
+	vector<string> stats;
+	for (int i = 0; i < all.size() - 2; i++)
+	{
+		if (!count(syms.begin(), syms.end(), all[i][1]))
+			syms.push_back(all[i][1]);
+		stats.push_back(all[i][0]);
+	}
+	vector<string> symRow;
+	symRow.push_back("state");
+	for (auto s : syms)
+		symRow.push_back(s);
+	input.push_back(symRow);
+	for (int i = 0; i < all.size() - 2; i++)
+	{
+		vector<string> outRow;
+		outRow.push_back(all[i][0]);
+		int k = i;
+		while (true)
+		{
+			if (k < all.size() && all[i][0] == all[k][0])
+			{
+				for (int j = 0; j < syms.size(); j++)
+				{
+					if (syms[j] != all[k][1])
+						outRow.push_back("Φ");
+					else
+						break;
+				}
+				string s = "{" + all[k][2] + "}";
+				outRow.push_back(s);
+			}
+			else
+				break;
+			k++;
+		}
+		for (int j = outRow.size(); j < syms.size() + 1; j++)
+			outRow.push_back("Φ");
+		input.push_back(outRow);
+	}
+	vector<string> lastRow;
+	lastRow.push_back(all[all.size() - 1][1]);
+	for (int i = 0; i < syms.size(); i++)
+		lastRow.push_back("Φ");
+
+	input.push_back(lastRow);
+	cout << "=================" << endl;
+	for (auto s : input)
+	{
+		for (auto ss : s)
+			cout << ss << " ";
+		cout << endl;
+	}
 	int row = input.size();		  // row of the matrix
 	int column = input[0].size(); // column of the matrix
 
@@ -91,7 +174,7 @@ int main()
 	int empty_index = -1;
 	for (int i = 0; i < column; i++)
 	{
-		if (input[0][i] == "ε")
+		if (input[0][i] == "#")
 			empty_index = i;
 		else
 			header.push_back(input[0][i]);
@@ -113,7 +196,6 @@ int main()
 		}
 	}
 	status.push_back(init_status);
-
 	int cur_index = 0;
 	while (cur_index < status.size())
 	{
@@ -121,6 +203,7 @@ int main()
 		vector<int> indexes; // records DFA status indexes
 
 		string cur_status = status[cur_index++];
+		cout << cur_status << endl;
 		cur_row.push_back(cur_status);
 
 		// update indexes vector
@@ -131,11 +214,12 @@ int main()
 		for (int i = 1; i < column; i++)
 		{
 			// Remove the empty set
-			if (input[0][i] == "ε")
+			if (input[0][i] == "#")
 				continue;
 			string next_status = "";
 			for (auto index : indexes)
 			{
+				// cout << index << " " << i << " " << input[index][i] << endl;
 				if (input[index][i] != "Φ")
 				{
 					next_status.append(input[index][i].substr(1, input[index][i].size() - 2));
@@ -194,9 +278,17 @@ int main()
 					}
 				}
 			}
-			row.push_back(value);
+			if (value != 0)
+				row.push_back(value);
 		}
 		DFA.push_back(row);
+	}
+	cout << "===============================" << endl;
+	for (auto s : DFA)
+	{
+		for (auto s1 : s)
+			cout << s1 << " ";
+		cout << endl;
 	}
 
 	// Output the result to a txt file, and use python to draw a picture according to the result
@@ -204,32 +296,30 @@ int main()
 	outfile.open("DFA.txt");
 	cout << endl
 		 << "DFA : " << endl;
-	for(auto h:header)
-	{
+	for (auto h : header)
 		cout << h << "  ";
-		outfile << h << "  ";
-	}
 	cout << endl;
-	outfile << endl;
-	for (auto s : DFA)
+	vector<string> symbols;
+	for (int i = 1; i < header.size(); i++)
+		symbols.push_back(header[i]);
+	for (int i = 0; i < DFA.size(); i++)
 	{
-		for (auto st : s)
+		for (int j = 1; j < DFA[i].size(); j++)
 		{
-			cout << st << "  ";
-			outfile << st << "  ";
+			outfile << DFA[i][0] << ' ' << symbols[j - 1] << ' ' << DFA[i][j] << endl;
+			cout << DFA[i][0] << ' ' << symbols[j - 1] << ' ' << DFA[i][j] << endl;
 		}
-		cout << endl;
-		outfile << endl;
 	}
+	outfile << "#" << endl;
 
 	// final state
 	cout << endl
 		 << "Final state : " << endl;
-	for (int i = 1; i < output.size();i++)
+	for (int i = 1; i < output.size(); i++)
 	{
-		if(output[i][0].find("Y") != string::npos)
+		if (output[i][0].find(all[all.size() - 1][1]) != string::npos)
 		{
-			outfile << map[output[i][0]];
+			outfile << map[output[i][0]] << " ";
 			cout << map[output[i][0]];
 		}
 	}
@@ -237,4 +327,3 @@ int main()
 	cout << endl;
 	return 0;
 }
-
