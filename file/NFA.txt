@@ -1,0 +1,14 @@
+i l j
+k l l
+m d n
+o # k
+o # m
+l # p
+n # p
+q # o
+q # r
+p # r
+p # o
+j # q
+&
+i r

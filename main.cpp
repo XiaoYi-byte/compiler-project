@@ -54,7 +54,6 @@ int main()
 		NFA_to_DFA();
 		minimize_DFA();
 		DFA_to_code();
-		sleep(1);
 		// remove(path.c_str());
 	}
 	return 0;

@@ -401,5 +401,6 @@ int DFA_to_code()
 	// 	break;
 	in.close();
 	out.close();
+	remove("./file/in.txt");
 	return 0;
 }
